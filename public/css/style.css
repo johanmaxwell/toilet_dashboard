@@ -1,0 +1,57 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", sans-serif;
+}
+
+.main-wrapper {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    padding: 0 0.5rem;
+}
+
+.auth-container {
+    backdrop-filter: blur(10px);
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    color: #effdff;
+}
+
+.auth-container h2 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.toggle-link {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.toggle-link a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.password-toggle-icon {
+    cursor: pointer;
+    color: #555;
+    z-index: 2;
+}
+
+.password-toggle-icon i {
+    font-size: 1.1rem;
+    position: absolute;
+    top: 60%;
+    right: 15px;
+}
