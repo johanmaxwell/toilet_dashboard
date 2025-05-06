@@ -66,9 +66,9 @@
                 <div class="modal-body">
                     <div class="row text-center">
                         <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">Small Plan</h5>
+                            <div class="card h-100">
+                                <div class="card-body ">
+                                    <h5 class="card-title">Small <br> Plan</h5>
                                     <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
                                     <p>200.000 dokumen</p>
                                     <p><strong>Rp15.000</strong></p>
@@ -77,9 +77,9 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="card">
+                            <div class="card h-100">
                                 <div class="card-body">
-                                    <h5 class="card-title">Normal Plan</h5>
+                                    <h5 class="card-title">Normal <br> Plan</h5>
                                     <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
                                     <p>1.000.000 dokumen</p>
                                     <p><strong>Rp60.000</strong></p>
@@ -88,9 +88,9 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="card">
+                            <div class="card h-100">
                                 <div class="card-body">
-                                    <h5 class="card-title">Big Plan</h5>
+                                    <h5 class="card-title">Big <br> Plan</h5>
                                     <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
                                     <p>5.000.000 dokumen</p>
                                     <p><strong>Rp250.000</strong></p>
@@ -416,6 +416,54 @@
                 }).catch(err => {
                     console.error("Error adding admin:", err);
                     Swal.fire("Error", "Could not add admin.", "error");
+                });
+            });
+
+            $(document).on('click', '.topup-btn', function() {
+                const companyId = $(this).data('company-id');
+                $('#topupModal').data('company-id', companyId).modal('show');
+            });
+
+            $(document).on('click', '.buy-plan', function() {
+                const plan = $(this).data('plan');
+                const companyId = $('#topupModal').data('company-id');
+                const email = localStorage.getItem('userEmail');
+
+                $.ajax({
+                    url: '/topup',
+                    method: 'POST',
+                    data: {
+                        plan: plan,
+                        company_id: companyId,
+                        email: email,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        snap.pay(response.snap_token, {
+                            onSuccess: function(result) {
+                                alert('Pembayaran berhasil!');
+                                if (result.status == 'Settlement') {
+                                    const addCredit = result.credit;
+
+                                    window.db.collection('company')
+                                        .doc(companyId)
+                                        .update({
+                                            credit: firebase.firestore.FieldValue.increment(
+                                                creditToAdd)
+                                        });
+                                }
+                            },
+                            onPending: function(result) {
+                                alert('Menunggu pembayaran...');
+                            },
+                            onError: function(result) {
+                                alert('Pembayaran gagal!');
+                            }
+                        });
+                    },
+                    error: function(xhr) {
+                        alert('Terjadi kesalahan saat memproses top-up.');
+                    }
                 });
             });
         </script>

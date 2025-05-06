@@ -62,11 +62,12 @@
         {{-- Datatables --}}
         <script src="https://cdn.datatables.net/2.3.0/js/dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/2.3.0/js/dataTables.bootstrap5.min.js"></script>
+        {{-- Midtrans --}}
+        <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-RckLBFsTyxMPamWc"></script>
         <!-- Firebase SDK -->
         <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-
         <script>
             const firebaseConfig = {
                 apiKey: "{{ config('services.firebase.apiKey') }}",
@@ -102,7 +103,16 @@
                             'content')
                     },
                     success: function() {
-                        window.location.href = '/login';
+                        Swal.fire({
+                            title: "Are you sure?",
+                            icon: "warning",
+                            showCancelButton: true,
+                            confirmButtonColor: "#3085d6",
+                            cancelButtonColor: "#d33",
+                            confirmButtonText: "Yes"
+                        }).then((result) => {
+                            window.location.href = '/login';
+                        });
                     },
                     error: function(xhr) {
                         Swal.fire('Error', 'Logout Error');
