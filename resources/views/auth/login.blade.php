@@ -23,6 +23,22 @@
 
     @push('scripts')
         <script>
+            $(document).ready(function() {
+                const savedRole = localStorage.getItem("userRole");
+                const savedEmail = localStorage.getItem("userEmail");
+                if (savedEmail) {
+                    if (savedRole === 'admin') {
+                        console.log('admin');
+                        //window.location.href = '/admin-dashboard';
+                    } else {
+                        console.log('user');
+                        //window.location.href = '/user-dashboard';
+                    }
+                } else {
+                    return;
+                }
+            });
+
             function togglePassword() {
                 const passwordInput = document.getElementById("password");
                 const toggleIcon = document.getElementById("toggleIcon");
@@ -45,17 +61,15 @@
                 if (!querySnapshot.empty) {
                     const user = querySnapshot.docs[0].data();
                     if (user.password === CryptoJS.SHA256(password).toString()) {
-                        const userRole = user.role == 'admin' ? 'admin ' : 'user';
-
                         localStorage.setItem('userEmail', user.email);
-                        localStorage.setItem('userRole', userRole);
+                        localStorage.setItem('userRole', user.role);
 
                         $.ajax({
                             url: '/set-role',
                             type: 'POST',
                             contentType: 'application/json',
                             data: JSON.stringify({
-                                role: userRole
+                                role: user.role
                             }),
                             success: function(res) {
                                 Swal.fire({
