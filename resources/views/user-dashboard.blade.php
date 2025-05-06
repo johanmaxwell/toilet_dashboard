@@ -424,10 +424,13 @@
                 $('#topupModal').data('company-id', companyId).modal('show');
             });
 
-            $(document).on('click', '.buy-plan', function() {
+            $(document).on('click', '.buy-plan', async function() {
                 const plan = $(this).data('plan');
                 const companyId = $('#topupModal').data('company-id');
                 const email = localStorage.getItem('userEmail');
+
+                const snapshot = await window.db.collection('account').where('email', '==', email).limit(1).get();
+                const data = snapshot.docs[0].data();
 
                 $.ajax({
                     url: '/topup',
@@ -435,31 +438,14 @@
                     data: {
                         plan: plan,
                         company_id: companyId,
-                        email: email,
+                        first_name: data.first_name,
+                        last_name: data.last_name,
+                        phone: data.phone,
+                        email: data.email,
                         _token: '{{ csrf_token() }}'
                     },
-                    success: function(response) {
-                        snap.pay(response.snap_token, {
-                            onSuccess: function(result) {
-                                alert('Pembayaran berhasil!');
-                                if (result.status == 'Settlement') {
-                                    const addCredit = result.credit;
-
-                                    window.db.collection('company')
-                                        .doc(companyId)
-                                        .update({
-                                            credit: firebase.firestore.FieldValue.increment(
-                                                creditToAdd)
-                                        });
-                                }
-                            },
-                            onPending: function(result) {
-                                alert('Menunggu pembayaran...');
-                            },
-                            onError: function(result) {
-                                alert('Pembayaran gagal!');
-                            }
-                        });
+                    success: function() {
+                        alert('ke halaman bayar!');
                     },
                     error: function(xhr) {
                         alert('Terjadi kesalahan saat memproses top-up.');

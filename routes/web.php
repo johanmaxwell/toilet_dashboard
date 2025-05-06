@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use App\Http\Controllers\TopupController;
 
 Route::get('/', function () {
     return view('auth.login');
@@ -37,3 +38,7 @@ Route::post('/logout', function (Request $request) {
 
     return response()->json(['message' => 'Logged out successfully'], 200);
 });
+
+Route::post('/topup', [TopupController::class, 'process'])->name('topup.process');
+
+Route::post('/topup/callback', [TopupController::class, 'callback'])->name('topup.callback');

@@ -23,21 +23,22 @@
 
     @push('scripts')
         <script>
-            $(document).ready(function() {
-                const savedRole = localStorage.getItem("userRole");
-                const savedEmail = localStorage.getItem("userEmail");
-                if (savedEmail) {
-                    if (savedRole === 'admin') {
-                        console.log('admin');
-                        //window.location.href = '/admin-dashboard';
-                    } else {
-                        console.log('user');
-                        //window.location.href = '/user-dashboard';
-                    }
-                } else {
-                    return;
-                }
-            });
+            // $(document).ready(function() {
+            //     const savedRole = localStorage.getItem("userRole");
+            //     const savedEmail = localStorage.getItem("userEmail");
+            //     if (savedEmail) {
+            //         if (savedRole == 'admin') {
+            //             console.log(savedRole);
+            //             console.log(savedEmail);
+            //             //window.location.href = '/admin-dashboard';
+            //         } else {
+            //             console.log('user');
+            //             //window.location.href = '/user-dashboard';
+            //         }
+            //     } else {
+            //         return;
+            //     }
+            // });
 
             function togglePassword() {
                 const passwordInput = document.getElementById("password");
