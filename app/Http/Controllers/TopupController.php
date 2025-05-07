@@ -48,8 +48,7 @@ class TopupController extends Controller
         $snapToken = \Midtrans\Snap::getSnapToken($params);
         $redirectUrl = "https://app.sandbox.midtrans.com/snap/v2/vtweb/" . $snapToken;
 
-        //return redirect($redirectUrl);
-        return response()->json(['snap_token' => $snapToken]);
+        return response()->json(['snap_token' => $snapToken, 'credit_add' => $plans[$plan]['credit'], 'redirect_url' => $redirectUrl]);
     }
 
     public function callback(Request $request) {}

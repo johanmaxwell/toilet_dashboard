@@ -442,10 +442,34 @@
                         last_name: data.last_name,
                         phone: data.phone,
                         email: data.email,
-                        _token: '{{ csrf_token() }}'
                     },
-                    success: function() {
-                        alert('ke halaman bayar!');
+                    success: (response) => {
+                        console.log(response.redirect_url);
+                        window.snap.pay(response.snap_token, {
+                            onSuccess: function(result) {
+                                Swal.fire({
+                                    title: "Pembayaran Berhasil",
+                                    icon: "success"
+                                });
+                                console.log(result);
+
+                                db.collection('company')
+                                    .doc(companyId)
+                                    .update({
+                                        credit: firebase.firestore.FieldValue.increment(
+                                            response.credit_add)
+                                    });
+
+                                loadCompanies();
+                            },
+                            onError: function(result) {
+                                Swal.fire({
+                                    title: "Pembayaran Gagal!",
+                                    icon: "warning"
+                                });
+                                console.log(result);
+                            },
+                        })
                     },
                     error: function(xhr) {
                         alert('Terjadi kesalahan saat memproses top-up.');

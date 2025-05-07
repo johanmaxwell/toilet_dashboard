@@ -63,7 +63,8 @@
         <script src="https://cdn.datatables.net/2.3.0/js/dataTables.min.js"></script>
         <script src="https://cdn.datatables.net/2.3.0/js/dataTables.bootstrap5.min.js"></script>
         {{-- Midtrans --}}
-        <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-RckLBFsTyxMPamWc"></script>
+        <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js"
+            data-client-key="{{ config('midtrans.client_key') }}"></script>
         <!-- Firebase SDK -->
         <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
         <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
