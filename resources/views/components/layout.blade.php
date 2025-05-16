@@ -65,20 +65,18 @@
                 }
             });
 
-            // $(document).ready(function() {
-            //     const email = localStorage.getItem('userEmail');
-            //     const role = localStorage.getItem('userRole');
+            $(document).ready(function() {
+                const email = localStorage.getItem('userEmail');
+                const role = localStorage.getItem('userRole');
 
-            //     if (email) {
-            //         if (role === 'admin') {
-            //             window.location.href = '/admin-dashboard';
-            //         } else {
-            //             window.location.href = '/user-dashboard';
-            //         }
-            //     } else {
-            //         window.location.href = '/login';
-            //     }
-            // });
+                if (email) {
+                    if (role === 'admin') {
+                        window.location.href = '/admin-dashboard';
+                    } else {
+                        window.location.href = '/user-dashboard';
+                    }
+                }
+            });
         </script>
         @stack('scripts')
     </body>

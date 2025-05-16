@@ -315,6 +315,7 @@
                         owner: owner,
                         privacy: privacy,
                         credit: 0,
+                        is_deactivated: false,
                         date_added: firebase.firestore.Timestamp.now()
                     };
                     if (privacy === 'private') {
