@@ -49,7 +49,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="adminModalBody">
-                    <!-- Dynamic content here -->
                 </div>
             </div>
         </div>
@@ -163,7 +162,7 @@
                             ${currentCredit < 0 ? '<p class="text-danger"><strong>Credit Negative!</strong></p>' : ''}
                             <p>Privacy: <strong class="privacy-val">${data.privacy}</strong></p>
                             ${data.privacy === 'private' ? `<p class="kode-akses-field">Kode Akses: <strong class="kode-val">${data.kode_akses}</strong></p>` : ''}
-                            <p>Credit Remaining: <strong>${currentCredit}</strong></p>
+                            <p>Credit Remaining: <strong>${formatWithDots(currentCredit)}</strong></p>
                         </div>
                     </div>
                 </div>
@@ -355,7 +354,19 @@
                         let html = `<ul class="list-group mb-3">`;
                         snapshot.forEach(doc => {
                             const data = doc.data();
-                            html += `<li class="list-group-item">${data.username}</li>`;
+                            const userId = doc.id;
+                            html += `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>${data.username}</span>
+                    <div>
+                        <button class="btn btn-warning btn-sm change-password-btn" data-user-id="${userId}">
+                            <i class="fas fa-key"></i> Change Password
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-admin-btn ms-2" data-user-id="${userId}">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </li>`;
                         });
                         html += `</ul>
             <button class="btn btn-primary btn-sm" id="addAdminBtn"><i class="fas fa-plus"></i> Add Admin</button>`;
@@ -367,6 +378,7 @@
                     });
             }
 
+            // Add new admin form
             $(document).on("click", "#addAdminBtn", function() {
                 const formHtml = `
         <form id="addAdminForm">
@@ -385,39 +397,131 @@
                 $("#adminModalBody").html(formHtml);
             });
 
+            // Cancel adding new admin
             $(document).on("click", "#cancelAddAdmin", function() {
                 const companyId = $("#adminModal").data("company-id");
                 showAdminList(companyId);
             });
 
-            $(document).on("submit", "#addAdminForm", async function(e) {
+            // Handle new admin submission
+            $(document).on("submit", "#addAdminForm", function(e) {
                 e.preventDefault();
 
+                const companyId = $("#adminModal").data("company-id");
                 const username = $("#newAdminUsername").val().trim();
                 const password = $("#newAdminPassword").val().trim();
-                const companyId = $("#adminModal").data("company-id");
 
                 if (!username || !password) {
-                    Swal.fire("Error", "All fields are required.", "error");
+                    Swal.fire("Error", "Username and password cannot be empty", "error");
                     return;
                 }
 
-                const hashedPassword = CryptoJS.SHA256(password).toString()
+                // Check if the username already exists
+                window.db.collection("users")
+                    .where("username", "==", username)
+                    .get()
+                    .then(snapshot => {
+                        if (!snapshot.empty) {
+                            Swal.fire("Error", "Username is already taken", "error");
+                            return;
+                        }
 
-                window.db.collection("users").add({
-                    username,
-                    password: hashedPassword,
-                    company: companyId,
-                    role: 'admin',
-                    date_added: firebase.firestore.Timestamp.now()
-                }).then(() => {
-                    Swal.fire("Success", "Admin added successfully", "success");
-                    showAdminList(companyId);
-                }).catch(err => {
-                    console.error("Error adding admin:", err);
-                    Swal.fire("Error", "Could not add admin.", "error");
+                        // Username is available, proceed to add admin
+                        const hashedPassword = CryptoJS.SHA256(password).toString();
+
+                        window.db.collection("users").add({
+                                username: username,
+                                password: hashedPassword,
+                                role: "admin",
+                                company: companyId
+                            })
+                            .then(() => {
+                                Swal.fire("Success", "Admin added successfully", "success");
+                                showAdminList(companyId);
+                            })
+                            .catch(err => {
+                                console.error("Error adding admin", err);
+                                Swal.fire("Error", "Failed to add admin", "error");
+                            });
+                    })
+                    .catch(err => {
+                        console.error("Error checking username", err);
+                        Swal.fire("Error", "Failed to check username", "error");
+                    });
+            });
+
+
+            // Handle admin deletion
+            $(document).on("click", ".delete-admin-btn", function() {
+                const userId = $(this).data("user-id");
+                const companyId = $("#adminModal").data("company-id");
+
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "This will permanently delete this admin.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, delete it!",
+                    cancelButtonText: "Cancel",
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.db.collection("users").doc(userId).delete()
+                            .then(() => {
+                                Swal.fire("Deleted", "Admin has been deleted.", "success");
+                                showAdminList(companyId);
+                            })
+                            .catch(err => {
+                                console.error("Error deleting admin", err);
+                                Swal.fire("Error", "Failed to delete admin", "error");
+                            });
+                    }
                 });
             });
+
+            // Handle password change
+            $(document).on("click", ".change-password-btn", function() {
+                const userId = $(this).data("user-id");
+                const formHtml = `
+        <form id="changePasswordForm" data-user-id="${userId}">
+            <div class="mb-3">
+                <label>New Password</label>
+                <input type="password" class="form-control" id="newPassword" required>
+            </div>
+            <button type="submit" class="btn btn-success">Save</button>
+            <button type="button" class="btn btn-secondary ms-2" id="cancelChangePassword">Cancel</button>
+        </form>
+    `;
+                $("#adminModalBody").html(formHtml);
+            });
+
+            // Cancel password change
+            $(document).on("click", "#cancelChangePassword", function() {
+                const companyId = $("#adminModal").data("company-id");
+                showAdminList(companyId);
+            });
+
+            // Handle password update
+            $(document).on("submit", "#changePasswordForm", function(e) {
+                e.preventDefault();
+
+                const userId = $(this).data("user-id");
+                const newPassword = $("#newPassword").val().trim();
+                const hashedPassword = CryptoJS.SHA256(newPassword).toString();
+
+                window.db.collection("users").doc(userId).update({
+                        password: hashedPassword
+                    })
+                    .then(() => {
+                        Swal.fire("Success", "Password updated successfully", "success");
+                        const companyId = $("#adminModal").data("company-id");
+                        showAdminList(companyId);
+                    })
+                    .catch(err => {
+                        console.error("Error updating password", err);
+                        Swal.fire("Error", "Failed to update password", "error");
+                    });
+            });
+
 
             $(document).on('click', '.topup-btn', function() {
                 const companyId = $(this).data('company-id');
@@ -476,6 +580,10 @@
                     }
                 });
             });
+
+            function formatWithDots(number) {
+                return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
         </script>
     @endpush
 </x-dashboard>

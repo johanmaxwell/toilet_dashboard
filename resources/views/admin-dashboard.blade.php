@@ -67,7 +67,7 @@
                             sumRead,
                             sumWrite,
                             total,
-                            adjustedCredit,
+                            formatWithDots(adjustedCredit),
                             actionButton
                         ]);
                     }
@@ -104,6 +104,10 @@
                         Swal.fire('Error', `Failed to ${action} company.`, 'error');
                     }
                 }
+            }
+
+            function formatWithDots(number) {
+                return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
             }
         </script>
     @endpush
