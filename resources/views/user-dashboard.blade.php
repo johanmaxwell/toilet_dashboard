@@ -157,7 +157,7 @@
                                 </button>
                         </div>
                         <div class="company-content">
-                            <h3 class="card-title">${companyId}</h3>
+                            <h3 class="card-title">${snakeToCapitalized(companyId)}</h3>
                             ${isDeactivated ? '<p class="text-warning"><strong>Company Deactivated!</strong></p>' : ''}
                             ${currentCredit < 0 ? '<p class="text-danger"><strong>Credit Negative!</strong></p>' : ''}
                             <p>Privacy: <strong class="privacy-val">${data.privacy}</strong></p>
@@ -258,13 +258,28 @@
                             $(`#card-${companyId} .delete-btn`).click(async function() {
                                 const confirm = await Swal.fire({
                                     title: "Delete this company?",
-                                    text: `Company ID: ${companyId}`,
+                                    text: `${companyId}`,
                                     icon: "warning",
                                     showCancelButton: true,
                                     confirmButtonText: "Delete"
                                 });
 
                                 if (confirm.isConfirmed) {
+                                    window.db.collection("config").doc(companyId).delete();
+                                    window.db.collection("gedung").doc(companyId).delete();
+                                    window.db.collection("logs").doc(companyId).delete();
+                                    window.db.collection("lokasi").doc(companyId).delete();
+                                    window.db.collection("sensor").doc(companyId).delete();
+                                    window.db.collection("usage_metrics").doc(companyId).delete();
+                                    window.db.collection("users").where("company", "==", companyId)
+                                        .get()
+                                        .then((querySnapshot) => {
+                                            const batch = window.db.batch();
+                                            querySnapshot.forEach((doc) => {
+                                                batch.delete(doc.ref);
+                                            });
+                                            return batch.commit();
+                                        })
                                     window.db.collection("company").doc(companyId).delete()
                                         .then(() => {
                                             Swal.fire("Deleted!", "", "success");
@@ -323,7 +338,7 @@
                     }
 
                     try {
-                        await window.db.collection("company").doc(companyName).set(newCompany);
+                        await window.db.collection("company").doc(toSnakeCase(companyName)).set(newCompany);
                         Swal.fire("Success", "Company added successfully", "success");
                         $("#addCompanyForm")[0].reset();
                         $("#kodeAksesContainer").hide();
@@ -565,7 +580,9 @@
                                             response.credit_add)
                                     });
 
-                                loadCompanies();
+                                setTimeout(function() {
+                                    loadCompanies();
+                                }, 3000);
                             },
                             onError: function(result) {
                                 Swal.fire({
@@ -584,6 +601,21 @@
 
             function formatWithDots(number) {
                 return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            function toSnakeCase(str) {
+                return str
+                    .replace(/([a-z])([A-Z])/g, '$1_$2')
+                    .replace(/[\s\-]+/g, '_')
+                    .replace(/[^a-zA-Z0-9_]/g, '')
+                    .toLowerCase();
+            }
+
+            function snakeToCapitalized(str) {
+                return str
+                    .split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
             }
         </script>
     @endpush

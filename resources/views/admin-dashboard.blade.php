@@ -61,7 +61,7 @@
                             `<button class="btn btn-danger w-100" onclick="toggleDeactivation('${doc.id}', true)">Deactivate</button>`;
 
                         companies.push([
-                            doc.id,
+                            snakeToCapitalized(doc.id),
                             data.owner || 'N/A',
                             data.privacy || 'N/A',
                             sumRead,
@@ -108,6 +108,13 @@
 
             function formatWithDots(number) {
                 return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            function snakeToCapitalized(str) {
+                return str
+                    .split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
             }
         </script>
     @endpush
